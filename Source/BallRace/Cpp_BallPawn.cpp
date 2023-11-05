@@ -4,6 +4,7 @@
 #include "Cpp_BallPawn.h"
 
 #include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 
 // Sets default values
 ACpp_BallPawn::ACpp_BallPawn()
@@ -18,8 +19,15 @@ void ACpp_BallPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if(APlayerController* playerCtrl = Cast<APlayerController>(GetController()))
+	{
+		UEnhancedInputLocalPlayerSubsystem* subsystem =
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerCtrl->GetLocalPlayer());
+		subsystem->ClearAllMappings();
+		subsystem->AddMappingContext(MappingContext,0);
+	}
 	
-	
+	SphereMesh = FindComponentByClass<UStaticMeshComponent>();
 }
 
 // Called every frame
@@ -43,6 +51,8 @@ void ACpp_BallPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void ACpp_BallPawn::OnMovement(const FInputActionValue& value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Input Working"));
+	FInputActionValue::Axis2D inputValue = value.Get<FInputActionValue::Axis2D>();
+	SphereMesh->AddForce(FVector(inputValue.X,inputValue.Y,0));
+	UE_LOG(LogTemp, Warning, TEXT("Input Working %f,%f"), inputValue.X,inputValue.Y);
 }
 
