@@ -7,6 +7,8 @@
 #include <InputAction.h>
 #include <InputMappingContext.h>
 
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Cpp_BallPawn.generated.h"
 
 
@@ -23,9 +25,14 @@ public:
 	UInputAction* MovementAction;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	UInputAction* MouseMovement;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	UInputMappingContext* MappingContext;
 
 	UStaticMeshComponent* SphereMesh;
+	USpringArmComponent* SpringArm;
+	UCameraComponent* Camera;
 
 protected:
 	// Called when the game starts or when spawned
@@ -40,4 +47,5 @@ public:
 
 	void OnMovement(const FInputActionValue& value);
 
+	void OnMouseMovement(const FInputActionValue& value);
 };

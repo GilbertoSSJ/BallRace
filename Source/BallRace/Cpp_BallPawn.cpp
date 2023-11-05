@@ -28,6 +28,8 @@ void ACpp_BallPawn::BeginPlay()
 	}
 	
 	SphereMesh = FindComponentByClass<UStaticMeshComponent>();
+	SpringArm = FindComponentByClass<USpringArmComponent>();
+	Camera = FindComponentByClass<UCameraComponent>();
 }
 
 // Called every frame
@@ -45,6 +47,7 @@ void ACpp_BallPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	if(UEnhancedInputComponent* InputComp=Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		InputComp->BindAction(MovementAction,ETriggerEvent::Triggered,this, &ACpp_BallPawn::OnMovement);
+		InputComp->BindAction(MouseMovement,ETriggerEvent::Triggered,this, &ACpp_BallPawn::OnMouseMovement);
 	}
 
 }
@@ -52,7 +55,23 @@ void ACpp_BallPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 void ACpp_BallPawn::OnMovement(const FInputActionValue& value)
 {
 	FInputActionValue::Axis2D inputValue = value.Get<FInputActionValue::Axis2D>();
-	SphereMesh->AddForce(FVector(inputValue.X,inputValue.Y,0));
+    FVector forwardVector = Camera->GetForwardVector();
+	forwardVector.Z = 0;
+	forwardVector.Normalize();
+
+	FVector movementVector = inputValue.X * Camera->GetForwardVector() + inputValue.Y * Camera->GetRightVector();
+	
+	SphereMesh->AddForce(movementVector);
 	UE_LOG(LogTemp, Warning, TEXT("Input Working %f,%f"), inputValue.X,inputValue.Y);
 }
 
+void ACpp_BallPawn::OnMouseMovement(const FInputActionValue& value)
+{
+	FInputActionValue::Axis2D inputValue = value.Get<FInputActionValue::Axis2D>();
+	SpringArm->AddLocalRotation(FRotator(inputValue.Y,inputValue.X,0));
+	FRotator springArmRotation = SpringArm->GetRelativeRotation();
+	SpringArm->SetRelativeRotation(FRotator(springArmRotation.Pitch,springArmRotation.Yaw,0));
+	UE_LOG(LogTemp, Warning, TEXT("Input Working %f,%f"), inputValue.X,inputValue.Y);
+}
+
+ 
